@@ -1,0 +1,63 @@
+#include "Sprite.h"
+#include "GLExt.h"
+#include "../Resources.h"
+#include <SDL2/SDL_image.h>
+#include <spdlog/spdlog.h>
+
+namespace video
+{
+	Sprite::Sprite(const std::string& name, const std::string& groupName)
+	{
+		auto res = Resources::Get(name, groupName);
+		if (!res)
+		{
+			spdlog::error("Failed to load sprite \"{}\" (group {}): Key doesn't exist.", name, groupName);
+			return;
+		}
+
+		SDL_RWops* rw = SDL_RWFromConstMem(res->Data(), res->Size());
+		SDL_Surface* sur = IMG_Load_RW(rw, true); 
+		if (!sur)
+		{
+			spdlog::error("Failed to load sprite \"{}\" (group {}): {}", name, groupName, IMG_GetError());
+			return;
+		}
+
+		glEnable(GL_TEXTURE_2D);
+		glGenTextures(1, &id);
+		glBindTexture(GL_TEXTURE_2D, id);
+
+		int mode = GL_RGB;
+		int rgb = 3;
+
+		if (sur->format->BytesPerPixel == 4)
+		{
+			mode = GL_RGBA;
+			rgb = 4;
+		}
+
+		glTexImage2D(GL_TEXTURE_2D, 0, rgb, sur->w, sur->h, 0, mode, GL_UNSIGNED_BYTE, sur->pixels);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+		width = sur->w;
+		height = sur->h;
+
+		SDL_FreeSurface(sur);
+	}
+
+	Sprite::~Sprite()
+	{
+		glDeleteTextures(1, &id);
+	}
+
+	GLuint Sprite::Width() const
+	{
+		return width;
+	}
+
+	GLuint Sprite::Height() const
+	{
+		return height;
+	}
+}
