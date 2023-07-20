@@ -30,18 +30,28 @@ namespace dev
         return true;
     }
 
-    void Audio::SetVolume(float volume)
+    void Audio::SetMusicVolume(float volume)
     {
         Mix_VolumeMusic(volume * MIX_MAX_VOLUME);
     }
 
-    void Audio::Play(audio::Music& music, bool loop)
+    void Audio::PlayMusic(audio::Music& music, bool loop)
     {
         Mix_PlayMusic(music.music, loop ? -1 : 0);
     }
 
-    void Audio::Stop()
+    void Audio::StopMusic()
     {
         Mix_HaltMusic();
+    }
+
+    int Audio::PlaySample(audio::Sample& sample, bool loop)
+    {
+        return Mix_PlayChannel(-1, sample.chunk, loop ? -1 : 0);
+    }
+
+    void Audio::StopChannel(int channel)
+    {
+        Mix_HaltChannel(channel);
     }
 }

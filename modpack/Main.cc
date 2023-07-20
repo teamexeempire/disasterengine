@@ -26,6 +26,14 @@ uint64_t _swap64(uint64_t val)
 
 #endif
 
+uint8_t getType(std::string ext)
+{
+    if (ext == ".ogg") return 3;
+    if (ext == ".wav") return 2;
+    if (ext == ".png") return 1;
+    return 0;
+}
+
 int main(int argc, char** argv)
 {
     if (argc < 3)
@@ -47,11 +55,9 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    std::ofstream out { argv[2], std::ios::binary };
+    std::fstream out { argv[2], std::ios::out | std::ios::binary };
 
-    const char HEADER[6] = { 'D', 'M', 'P', 'K', 'v', MODPACKVER[0] };
-    const char NULLTERM = '\0';
-
+    const char* HEADER = "HPAKv1";
     out.write(HEADER, 6);
 
     for (const auto& entry : std::filesystem::recursive_directory_iterator(argv[1]))
@@ -59,49 +65,39 @@ int main(int argc, char** argv)
         if (entry.is_directory())
             continue;
 
-        std::ifstream file { entry.path(), std::ios::binary };
-
+        std::fstream file { entry.path(), std::ios::in | std::ios::binary };
         if (file.fail())
         {
-            std::cout << "retard error" << std::endl;
+            std::cout << "Failed to open " << entry.path() << std::endl;
             return 1;
         }
 
         file.seekg(0, std::ios::end);
-    
-        // writing size
-        uint64_t size = file.tellg();
-        uint64_t _swp = swap64(size);
-
-        out.write((const char*)&_swp, sizeof(size));
-
-        // writing path
-        auto path = entry.path().string();
-        path = path.substr(path.find_last_of("/\\") + 1);
-
-        out.write(path.c_str(), path.length());
-        out.write((const char*)&NULLTERM, 1);
-
-        //now write data
+        uint64_t len = file.tellg();
         file.seekg(0, std::ios::beg);
 
-        uint64_t pos = 0;
-        while (pos < size)
-        {
-            char buffer[1024];
-            file.read(buffer, 1024);
-
-            uint64_t read = file.gcount();
-            out.write(buffer, read);
-
-            pos += read;
-        }
-
+        // Read file
+        char* buffer = new char[len];
+        memset(buffer, 0, len);
+        file.read(buffer, len);
         file.close();
-        std::cout << entry.path() << std::endl;
+
+        auto fname = entry.path().filename().string();
+        uint8_t fnameLen = fname.length();
+        auto ext = entry.path().extension().string();
+        uint8_t type = getType(ext);
+
+        out.write((char*)&fnameLen, 1);
+        out.write(fname.c_str(), fname.length());
+        out.write((char*)&type, 1);
+        out.write((char*)&len, 8);
+        out.write(buffer, len);
+        delete[] buffer;
+
+        std::cout << entry.path().filename() << "..." << std::endl;
     }
 
     out.close();
-    std::cout << "Ok!" << std::endl;
+    std::cout << "Done." << std::endl;
     return 0;
 }

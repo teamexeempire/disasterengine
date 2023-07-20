@@ -5,14 +5,10 @@
 #cmakedefine BIG_ENDIAN
 #ifdef BIG_ENDIAN
 
-#define swap16(x) _swap16(x)
-#define swap32(x) _swap32(x)
 #define swap64(x) _swap64(x)
 
 #else
 
-#define swap16(x) (x)
-#define swap32(x) (x)
 #define swap64(x) (x)
 
 #endif

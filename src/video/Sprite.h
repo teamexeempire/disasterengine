@@ -3,13 +3,16 @@
 #include <cstdint>
 #include <string>
 
+class Resource;
 namespace video
 {
 	class Sprite
 	{
 	public:
-		Sprite(const std::string& name, const std::string& groupName = "default");
+		Sprite();
 		~Sprite();
+
+		bool Load(const uint8_t* data, uint64_t size);
 
 		GLuint Width() const;
 		GLuint Height() const;

@@ -2,19 +2,24 @@
 #include <SDL2/SDL_mixer.h>
 #include <string>
 
+namespace dev
+{
+	class Audio;
+}
+
+class Resource;
 namespace audio
 {
 	class Sample
 	{
 	public:
-		Sample(const std::string& name, const std::string& groupName = "default");
+		Sample();
 		~Sample();
 
-		void Play(bool loop = false);
-		void Stop();
+		bool Load(const uint8_t* data, uint64_t size);
 
 	private:
-		Mix_Chunk* chunk;
-		int channel = -1;
+		friend class dev::Audio;
+		Mix_Chunk* chunk = nullptr;
 	};
 }

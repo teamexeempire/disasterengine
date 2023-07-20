@@ -1,7 +1,7 @@
 #include "Shader.h"
 #include "GLExt.h"
 #include "Render.h"
-#include "../Resources.h"
+#include "../res/Resources.h"
 #include <spdlog/spdlog.h>
 
 namespace video
@@ -37,7 +37,7 @@ namespace video
         if (!GLExt::IsInit())
             return false;
         
-        auto res = Resources::Get(name, groupName);
+        auto res = Resources::Get<ArrayResource>(name, groupName);
         if (!res)
         {
             spdlog::error("Failed to load fragment shader \"{}\" (group {}): Key doesn't exist.", name, groupName);
@@ -67,7 +67,7 @@ namespace video
         if (!GLExt::IsInit())
             return false;
 
-        auto res = Resources::Get(name, groupName);
+        auto res = Resources::Get<ArrayResource>(name, groupName);
         if (!res)
         {
             spdlog::error("Failed to load fragment shader \"{}\" (group {}): Key doesn't exist.", name, groupName);

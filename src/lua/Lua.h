@@ -30,9 +30,10 @@ namespace lua
 	class Lua
 	{
 	public:
+		Lua();
 		~Lua();
 
-		bool Do(const LuaLString code);
+		bool Do(const std::string& name, const std::string& groupName = "default");
 
 		void Push(LuaNumber value);
 		void Push(LuaBoolean boolean);

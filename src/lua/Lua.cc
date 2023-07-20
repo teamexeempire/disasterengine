@@ -1,22 +1,33 @@
 #include "Lua.h"
+#include "LuaExt.h"
+#include "../res/Resources.h"
 #include <spdlog/spdlog.h>
 #include <stdexcept>
 
 namespace lua
 {
-	Lua::~Lua()
-	{
-		if (L)
-			lua_close(L);
-	}
-
-	bool Lua::Do(const LuaLString code)
+	Lua::Lua()
 	{
 		L = luaL_newstate();
+	}
 
+	Lua::~Lua()
+	{
+		lua_close(L);
+	}
+
+	bool Lua::Do(const std::string& name, const std::string& groupName)
+	{
 		if (!L)
 		{
 			spdlog::error("Failed to create LUA state!");
+			return false;
+		}
+
+		auto res = Resources::Get<ArrayResource>(name, groupName);
+		if (!res)
+		{
+			spdlog::error("Failed to load script \"{}\" (group {}): Key doesn't exist.", name, groupName);
 			return false;
 		}
 
@@ -43,6 +54,11 @@ namespace lua
 		lua_pushcfunction(L, luaopen_package);
 		lua_pushstring(L, LUA_DBLIBNAME);
 		lua_call(L, 1, 0);
+
+		RegisterExt(L);
+
+		std::string code;
+		code.append((const char*)res->Data(), res->Size());
 
 		if (luaL_dostring(L, code.c_str()))
 		{
@@ -71,7 +87,7 @@ namespace lua
 		if (lua_isnil(L, -1))
 		{
 			spdlog::error("LUA global \"{}\" is nil!", name);
-			throw std::invalid_argument("LUA global name is NIL!");
+			return {};
 		}
 
 		LuaGlobal global;
@@ -160,6 +176,9 @@ namespace lua
 
 	bool LuaGlobal::Call()
 	{
+		if (!parent)
+			return false;
+
 		if (lua_pcall(parent->L, parent->stack, 0, 0) != LUA_OK)
 		{
 			spdlog::warn("LUA Runtime error: {}", lua_tostring(parent->L, -1));

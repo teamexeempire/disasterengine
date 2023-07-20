@@ -1,26 +1,33 @@
 #include "Sprite.h"
 #include "GLExt.h"
-#include "../Resources.h"
 #include <SDL2/SDL_image.h>
 #include <spdlog/spdlog.h>
 
 namespace video
 {
-	Sprite::Sprite(const std::string& name, const std::string& groupName)
+	Sprite::Sprite()
 	{
-		auto res = Resources::Get(name, groupName);
-		if (!res)
+	}
+
+	Sprite::~Sprite()
+	{
+		glDeleteTextures(1, &id);
+	}
+
+	bool Sprite::Load(const uint8_t* data, uint64_t size)
+	{
+		if (!data)
 		{
-			spdlog::error("Failed to load sprite \"{}\" (group {}): Key doesn't exist.", name, groupName);
-			return;
+			spdlog::error("Failed to load from resource: Resource is nullptr_t");
+			return false;
 		}
 
-		SDL_RWops* rw = SDL_RWFromConstMem(res->Data(), res->Size());
-		SDL_Surface* sur = IMG_Load_RW(rw, true); 
+		SDL_RWops* rw = SDL_RWFromConstMem(data, size);
+		SDL_Surface* sur = IMG_Load_RW(rw, true);
 		if (!sur)
 		{
-			spdlog::error("Failed to load sprite \"{}\" (group {}): {}", name, groupName, IMG_GetError());
-			return;
+			spdlog::error("Failed to load from resource: {}",IMG_GetError());
+			return false;
 		}
 
 		glEnable(GL_TEXTURE_2D);
@@ -44,11 +51,7 @@ namespace video
 		height = sur->h;
 
 		SDL_FreeSurface(sur);
-	}
-
-	Sprite::~Sprite()
-	{
-		glDeleteTextures(1, &id);
+		return true;
 	}
 
 	GLuint Sprite::Width() const

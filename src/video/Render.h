@@ -26,6 +26,7 @@ namespace video
 
 	private:
 		inline static Shader sprShader;
+		inline static const Sprite* font;
 		inline static Uniform sprImage, sprColor, sprX, sprY, sprSrcWidth, sprSrcHeight, sprWidth, sprHeight;
 		inline static GLuint vao;
 	};

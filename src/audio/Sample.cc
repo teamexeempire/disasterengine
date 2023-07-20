@@ -1,25 +1,10 @@
 #include "Sample.h"
-#include "../Resources.h"
 #include <spdlog/spdlog.h>
 
 namespace audio
 {
-	Sample::Sample(const std::string& name, const std::string& groupName)
+	Sample::Sample()
 	{
-		auto res = Resources::Get(name, groupName);
-		if (!res)
-		{
-			spdlog::error("Failed to load sample \"{}\" (group {}): Key doesn't exist.", name, groupName);
-			return;
-		}
-
-		SDL_RWops* rw = SDL_RWFromConstMem(res->Data(), res->Size());
-		chunk = Mix_LoadWAV_RW(rw, true);
-		if (!chunk)
-		{
-			spdlog::error("Failed to load sample \"{}\" (group {}): {}", name, groupName, Mix_GetError());
-			return;
-		}
 	}
 
 	Sample::~Sample()
@@ -27,17 +12,20 @@ namespace audio
 		Mix_FreeChunk(chunk);
 	}
 
-	void Sample::Play(bool loop)
+	bool Sample::Load(const uint8_t* data, uint64_t size)
 	{
-		channel = Mix_PlayChannel(-1, chunk, loop ? -1 : 0);
-	}
+		if (!data)
+		{
+			spdlog::error("Failed to load sample from resource: Resource is nullptr_t");
+			return false;
+		}
 
-	void Sample::Stop()
-	{
-		if (channel == -1)
-			return;
-
-		Mix_HaltChannel(channel);
-		channel = -1;
+		SDL_RWops* rw = SDL_RWFromConstMem(data, size);
+		chunk = Mix_LoadWAV_RW(rw, true);
+		if (!chunk)
+		{
+			spdlog::error("Failed to load sample from resource: {}", Mix_GetError());
+			return false;
+		}
 	}
 }

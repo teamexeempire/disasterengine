@@ -1,5 +1,6 @@
 #pragma once
 #include "Music.h"
+#include "Sample.h"
 #include <SDL2/SDL_mixer.h>
 
 namespace dev
@@ -9,8 +10,11 @@ namespace dev
 	public:
 		static bool Open();
 
-		static void SetVolume(float volume);
-		static void Play(audio::Music& music, bool loop = false);
-		static void Stop();
+		static void SetMusicVolume(float volume);
+		static void PlayMusic(audio::Music& music, bool loop = false);
+		static void StopMusic();
+
+		static int PlaySample(audio::Sample& sample, bool loop = true);
+		static void StopChannel(int channel);
 	};
 }

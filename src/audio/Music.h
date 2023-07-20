@@ -8,13 +8,16 @@ namespace dev
 	class Audio;
 }
 
+class Resource;
 namespace audio
 {
 	class Music
 	{
 	public:
-		Music(const std::string& name, const std::string& groupName = "default");
+		Music();
 		~Music();
+
+		bool Load(const uint8_t* data, uint64_t size);
 
 	private:
 		friend class dev::Audio;

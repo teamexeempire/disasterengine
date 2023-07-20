@@ -34,9 +34,6 @@ namespace dev
 		spdlog::info("  TIF: {}", (flags & IMG_INIT_TIF) != 0);
 		spdlog::info("  WEBP: {}", (flags & IMG_INIT_WEBP) != 0);
 
-		if (!video::Render::Init())
-			return false;
-
 		return true;
 	}
 

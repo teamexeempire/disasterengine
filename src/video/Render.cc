@@ -1,4 +1,5 @@
 #include "Render.h"
+#include "../res/Resources.h"
 #include <spdlog/spdlog.h>
 
 namespace video
@@ -20,6 +21,14 @@ namespace video
         sprSrcHeight = sprShader.GetUniform("uSHeight");
         sprWidth = sprShader.GetUniform("uWidth");
         sprHeight = sprShader.GetUniform("uHeight");
+
+        auto fontRes = Resources::Get<SpriteResource>("default_font.png");
+        if (!fontRes)
+            return false;
+
+        font = fontRes->Data();
+        if (!font)
+            return false;
 
         unsigned int VBO;
         float vertices[] =
@@ -113,8 +122,6 @@ namespace video
 
     void Render::DrawString(std::string string, double x, double y, double scale, Color color)
     {
-        static Sprite font = { "default_font.png" };
-
         Rectangle dstRect = { x, y, 8 * scale, 6 * scale };
         Rectangle srcRect = { 0, 0, 8, 6 };
         for (size_t i = 0; i < string.length(); i++)
@@ -187,7 +194,7 @@ namespace video
                 break;
             }
 
-            Draw(font, srcRect, dstRect, 0, 0, 0, color);
+            Draw(*font, srcRect, dstRect, 0, 0, 0, color);
             dstRect.x += 6 * scale;
 
             switch (c)

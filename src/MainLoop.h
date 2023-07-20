@@ -1,15 +1,18 @@
 #pragma once
-#include "state/State.h"
-#include "ModPack.h"
+#include "lua/Lua.h"
+#include <memory>
 
 class MainLoop
 {
 public:
 	static int Run();
-
-	template <typename T>
-	static void SwitchState();
+	static bool SetScript(const std::string path, const std::string& groupName = "default");
 
 private:
-	static inline state::State* state = nullptr;
+	static inline std::shared_ptr<lua::Lua> script;
+	static inline lua::LuaGlobal tick, draw;
+
+	// Scene stuff
+	static inline bool shouldSwitch;
+	static inline std::shared_ptr<lua::Lua> nextScript;
 };

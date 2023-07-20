@@ -1,25 +1,29 @@
 #include "Music.h"
-#include "../Resources.h"
 #include <spdlog/spdlog.h>
 
 namespace audio
 {
-	Music::Music(const std::string& name, const std::string& groupName)
+	bool Music::Load(const uint8_t* data, uint64_t size)
 	{
-		auto res = Resources::Get(name, groupName);
-		if (!res)
+		if (!data)
 		{
-			spdlog::error("Failed to load music \"{}\" (group {}): Key doesn't exist.", name, groupName);
-			return;
+			spdlog::error("Failed to load music from resource: resource is nullptr_t");
+			return false;
 		}
 
-		SDL_RWops* rw = SDL_RWFromConstMem(res->Data(), res->Size());
+		SDL_RWops* rw = SDL_RWFromConstMem(data, size);
 		music = Mix_LoadMUS_RW(rw, true);
 		if (!music)
 		{
-			spdlog::error("Failed to load music \"{}\" (group {}): {}", name, groupName, Mix_GetError());
-			return;
+			spdlog::error("Failed to load music from resource: {}", Mix_GetError());
+			return false;
 		}
+
+		return true;
+	}
+
+	Music::Music()
+	{
 	}
 
 	Music::~Music()
