@@ -6,4 +6,4 @@ if (POLICY CMP0141)
 endif()
 
 add_subdirectory("modpack") # ModPack tool
-add_subdirectory("src") # Game's code
+add_subdirectory("disasterengine") # Game's code
